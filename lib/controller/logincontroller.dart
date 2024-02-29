@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:welcom/main.dart';
 import 'package:welcom/model/sqlitedb2.dart';
 
 class LoginPageController extends GetxController {
@@ -19,15 +18,15 @@ class LoginPageController extends GetxController {
   void onInit() {
     super.onInit();
     readData();
-    //remember();
   }
-save(){ 
-   textEditingController.text =
-        sharedPreferences!.getString('email').toString();
-    passEditingController.text =
-        sharedPreferences!.getString('pass').toString();
 
-}
+  // save() {
+  //   textEditingController.text =
+  //       sharedPreferences!.getString('email').toString();
+  //   passEditingController.text =
+  //       sharedPreferences!.getString('pass').toString();
+  // }
+
   @override
   void onReady() {
     // called after the widget is rendered on screen
@@ -40,11 +39,4 @@ save(){
     textEditingController.dispose();
     super.onClose();
   }
-
-  // remember() async {
-  //   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-  //   textEditingController.text =
-  //       sharedPreferences.getString('email').toString();
-  //   passEditingController.text = sharedPreferences.getString('pass').toString();
-  // }
 }

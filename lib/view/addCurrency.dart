@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:welcom/controller/currencyController.dart';
-import 'package:welcom/view/sidebar.dart';
+import 'package:welcom/model/currency.dart';
 
 class AddCurr extends GetView<CurrencyController> {
   AddCurr({super.key});
@@ -14,6 +14,12 @@ class AddCurr extends GetView<CurrencyController> {
 
   @override
   Widget build(BuildContext context) {
+    if (Get.arguments != null) {
+      controllerCurrName.text = Get.arguments['currencyName'];
+      controllerCurrSymbol.text = Get.arguments['currencySymbol'];
+      controllerRate.text = Get.arguments['rate'];
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Add Currency Here"),
@@ -23,7 +29,7 @@ class AddCurr extends GetView<CurrencyController> {
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           TextFormField(
             controller: controllerCurrName,
-            // keyboardType: TextInputType.text,
+            keyboardType: TextInputType.text,
             decoration: InputDecoration(
               labelText: 'Currency Name',
               contentPadding:
@@ -74,16 +80,21 @@ class AddCurr extends GetView<CurrencyController> {
               minWidth: double.infinity,
               height: 60,
               onPressed: () async {
-                Map<String, String> currency = {
-                  'curreny_name': controllerCurrName.text,
-                  'currency_symbol': controllerCurrSymbol.text,
-                  'rate': controllerRate.text,
-                };
-                await controller.insert('currency', currency);
-
-                controllerCurr.currency.clear();
-                controllerCurr.readData2();
-                Get.off(() => SideBarPage());
+                Currency currency1 = Currency(
+                    currencyName: controllerCurrName.text,
+                    currencySymbol: controllerCurrSymbol.text,
+                    rate: double.parse(controllerRate.text));
+                // print(currency);
+                print(Get.arguments);
+                if (Get.arguments == null) {
+                  await controller.insert('currency', currency1);
+                } else {
+                  final int? currencyId =
+                      int.parse(Get.arguments!['currencyId']);
+                  await controller.updateCurrency(
+                      'currency', currency1, currencyId!);
+                }
+                Get.back();
               },
               color: Colors.greenAccent,
               elevation: 0,

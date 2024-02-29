@@ -210,14 +210,12 @@ class Loginpage2 extends GetView<LoginPageController> {
                           child: Obx(
                             () => Checkbox(
                               value: controllerr.rememberMe.value,
-                              onChanged: (value) async {
-                                controllerr.toggleRememberMe(value!);
-                                if (value) {
-                                  sharedPreferences!.setString(
-                                      'email', textEditingController.text);
-                                  sharedPreferences!.setString(
-                                      'pass', passEditingController.text);
-                                }
+                              onChanged: (bool? value) async {
+                                controllerr.toggleRememberMe(value);
+                                sharedPreferences!.setString(
+                                    'email', textEditingController.text);
+                                sharedPreferences!.setString(
+                                    'pass', passEditingController.text);
                               },
                             ),
                           ),
@@ -250,18 +248,17 @@ class Loginpage2 extends GetView<LoginPageController> {
                             height: 60,
                             onPressed: () async {
                               if (formstate.currentState!.validate()) {
-                                // ignore: unused_local_variable
                                 List<Map> response2 = await sqldb.readData(
                                     "SELECT * FROM users WHERE email='${controller2.textEditingController.text}'");
                                 // ignore: avoid_print
                                 print(response2);
-                                // ignore: unrelated_type_equality_checks, use_build_context_synchronously
+                                // ignore: avoid_print
+                                print(sharedPreferences);
                                 if (response2.isEmpty) {
                                   // ignore: avoid_print
                                   print(
                                       'User with the provided email does not exist!');
                                 } else {
-                                  // ignore: use_build_context_synchronously
                                   Get.to(() => SideBarPage());
                                 }
                               }

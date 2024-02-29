@@ -2,10 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:welcom/main.dart';
 import 'package:welcom/view/CurrencyPage.dart';
 import 'package:welcom/view/OrderPage.dart';
-import 'package:welcom/view/adduser.dart';
 import 'package:welcom/view/login2.dart';
+import 'package:welcom/view/signup1.dart';
 import 'package:welcom/view/userPage.dart';
 
 class SideBarController extends GetxController {
@@ -25,6 +26,7 @@ class SideBarController extends GetxController {
   logout() {
     return IconButton(
         onPressed: () {
+          sharedPreferences!.clear();
           Get.to(() => Loginpage2());
         },
         icon: const Icon(Icons.logout));
@@ -34,7 +36,7 @@ class SideBarController extends GetxController {
     if (index.value == 0) {
       return IconButton(
           onPressed: () {
-            Get.to(() => AddUser());
+            Get.to(() => SignupPage());
           },
           icon: const Icon(Icons.add));
     }

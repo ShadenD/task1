@@ -1,32 +1,39 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, avoid_print
+
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-// import 'package:welcom/controller/drawercontroller.dart';
+import 'package:welcom/api/pdf_invoice_api.dart';
+import 'package:welcom/controller/archivecontroller.dart';
 import 'package:welcom/controller/ordercontroller.dart';
+import 'package:welcom/model/currency.dart';
+import 'package:welcom/model/order.dart';
+import 'package:welcom/model/orderArguments.dart';
+import 'package:welcom/model/pdfmodel.dart';
+import 'package:welcom/model/user.dart';
 import 'package:welcom/view/addorder.dart';
-// import 'package:welcom/widget/navigatorRail.dart';
+import 'package:welcom/view/pdf_page.dart';
 
 // ignore: must_be_immutable
 class Orders extends GetView<OrederController> {
   Orders({super.key});
   var scaffoldkey3 = GlobalKey<ScaffoldState>();
-
   OrederController controller6 = Get.put(OrederController());
   OrederController orederController = Get.put(OrederController());
   TextEditingController fitercontroller = TextEditingController();
+  ArchiveController archiveController = Get.put(ArchiveController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // key: scaffoldkey3,
-      // extendBodyBehindAppBar: true,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.white,
           tooltip: 'Increment',
           child: const Icon(Icons.add),
           onPressed: () {
+            print(orederController.orders);
             Get.to(() => Add());
           }),
       body: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -89,7 +96,7 @@ class Orders extends GetView<OrederController> {
                                       }
                                     }
                                     if (fitercontroller.text == '') {
-                                      controller.states.clear();
+                                      controller.states!.clear();
                                       controller.orders.clear();
                                       controller.readDataOrder();
                                     }
@@ -100,8 +107,18 @@ class Orders extends GetView<OrederController> {
                                     BorderRadius.all(Radius.circular(25)),
                               )),
                           onChanged: (value) {
+                            if (fitercontroller.text.toLowerCase() == "paid") {
+                              orederController.getAllPaid();
+                            } else {
+                              if (fitercontroller.text.toLowerCase() ==
+                                  "not paid") {
+                                controller.getAllNotPaid();
+                              } else {
+                                orederController.filter(fitercontroller.text);
+                              }
+                            }
                             if (value == '') {
-                              orederController.states.clear();
+                              orederController.states!.clear();
                               orederController.orders.clear();
                               orederController.readDataOrder();
                             }
@@ -120,58 +137,177 @@ class Orders extends GetView<OrederController> {
                   child: ListView.builder(
                     itemCount: orederController.orders.length,
                     itemBuilder: (context, i) {
+                      print(orederController.orders[i]['username']);
                       return Card(
-                        child: ListTile(
-                            title: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                    " ${orederController.orders[i]['username']}"),
-                                Text(
-                                    " ${orederController.orders[i]['order_date']}"),
-                                Obx(
-                                  () => Text(
-                                      " ${orederController.states[i] == 1 ? "Paid" : orederController.states[i] == 0 ? "Not Paid" : null}"),
-                                ),
-                                Text(" ${orederController.orders[i]['type']}"),
-                                Text(
-                                    " ${orederController.orders[i]['amount']}"),
-                                Text(
-                                    " ${orederController.orders[i]['equalAmount']}"),
-                                Text(
-                                    " ${orederController.orders[i]['currencyName']}"),
-                              ],
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  onPressed: () async {
-                                    await orederController.delete('orders',
-                                        orederController.orders[i]['order_Id']);
-                                  },
-                                  icon: const Icon(Icons.delete),
-                                ),
-                                Obx(
-                                  () => Switch(
-                                    value: orederController.states[i] == 1
-                                        ? true
-                                        : false,
-                                    onChanged: (bool value) async {
-                                      await orederController.updateOrderState(
-                                          value ? 1 : 0,
+                        child: Obx(
+                          () => ListTile(
+                              title: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                      " ${orederController.orders[i]['username']}"),
+                                  Text(
+                                      " ${orederController.orders[i]['order_date']}"),
+                                  Obx(() => Text(i <
+                                          orederController.orders.length
+                                      ? orederController.orders[i]['status'] ==
+                                              1
+                                          ? "Paid"
+                                          : orederController.orders[i]
+                                                      ['status'] ==
+                                                  0
+                                              ? "Not Paid"
+                                              : ""
+                                      : "Invalid Index")),
+                                  Text(
+                                      " ${orederController.orders[i]['type']}"),
+                                  Text(
+                                      " ${orederController.orders[i]['amount']}"),
+                                  Text(
+                                      " ${orederController.orders[i]['equalAmount']}"),
+                                  Text(
+                                      " ${orederController.orders[i]['currencyName']}"),
+                                ],
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    onPressed: () async {
+                                      await orederController.delete(
+                                          'orders',
                                           orederController.orders[i]
                                               ['order_Id']);
-
-                                      orederController.switchOrderState(
-                                          i, value);
-                                      orederController.orders.clear();
-                                      orederController.readDataOrder();
                                     },
+                                    icon: const Icon(Icons.delete),
                                   ),
-                                ),
-                              ],
-                            )),
+                                  IconButton(
+                                    onPressed: () async {
+                                      final date = DateTime.now();
+                                      final dueDate =
+                                          date.add(const Duration(days: 7));
+                                      final invoice = Invoice(
+                                        order: Orderss(
+                                          order_date: orederController.orders[i]
+                                              ['order_date'],
+                                          order_amount: orederController
+                                              .orders[i]['amount'],
+                                          equal_order_amount: double.parse(
+                                              orederController.orders[i]
+                                                      ['equalAmount']
+                                                  .toString()),
+                                          curr_id: orederController.orders[i]
+                                              ['curr_id'],
+                                          status: orederController.orders[i]
+                                                  ['status'] ==
+                                              1,
+                                          type: orederController.orders[i]
+                                              ['type'],
+                                          user_id: orederController.orders[i]
+                                              ['user_id'],
+                                        ),
+                                        Supplier: Users(
+                                          username: "Spinel Technology",
+                                          email: " spinel@gmail.com",
+                                          pass: '',
+                                          bod: " ",
+                                          photo: '',
+                                        ),
+                                        Customer: Users(
+                                          username: controller.orders[i]
+                                              ['username'],
+                                          email: controller.orders[i]['email'],
+                                          pass: '',
+                                          photo: '',
+                                          bod: controller.orders[i]['bod'],
+                                        ),
+                                        info: InvoiceInfo(
+                                            description: 'Goods sold',
+                                            number: 'INV-001',
+                                            date: date,
+                                            dueDate: dueDate,
+                                            descriptionPdf: [
+                                              " 1- Universal Compatibility: PDF documents can be viewed, printed, and shared across \n various platforms and devices without the need for specific\n software or operating systems. This universal\n compatibility makes PDFs a popular choice for document sharing.",
+                                              " 2- Preservation of Formatting: PDF documents accurately preserve\n the layout, formatting, fonts, and graphics of the original document, regardless of the software\n used to create them."
+                                            ]),
+                                      );
+                                      final File pdfFile =
+                                          await PdfInvoiceApi.generate(invoice);
+                                      Get.to(() => PdfOpen(), arguments: {
+                                        "File": pdfFile.path,
+                                      });
+                                    },
+                                    icon: const Icon(
+                                        Icons.picture_as_pdf_outlined),
+                                  ),
+                                  IconButton(
+                                    color:
+                                        const Color.fromARGB(255, 64, 99, 67),
+                                    onPressed: () {
+                                      Get.to(() => Add(),
+                                          arguments: OrderArgument(
+                                              id: controller.orders[i]
+                                                  ['order_Id'],
+                                              currency: Currency(
+                                                  currencyName:
+                                                      controller.orders[i]
+                                                          ['currencyName'],
+                                                  currencySymbol: '',
+                                                  rate: controller.orders[i]
+                                                      ['rate']),
+                                              order: Orderss(
+                                                order_date: orederController
+                                                    .orders[i]['order_date']
+                                                    .toString(),
+                                                order_amount: orederController
+                                                    .orders[i]['amount'],
+                                                equal_order_amount:
+                                                    double.parse(
+                                                        orederController
+                                                            .orders[i]
+                                                                ['equalAmount']
+                                                            .toString()),
+                                                curr_id: orederController
+                                                    .orders[i]['curr_id'],
+                                                status:
+                                                    orederController.orders[i]
+                                                                ['status'] ==
+                                                            1
+                                                        ? true
+                                                        : false,
+                                                type: orederController.orders[i]
+                                                        ['type']
+                                                    .toString(),
+                                                user_id: orederController
+                                                    .orders[i]['user_id'],
+                                              )));
+                                    },
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      size: 30.0,
+                                    ),
+                                  ),
+                                  Obx(
+                                    () => Switch(
+                                      value: orederController.orders[i]
+                                                  ['status'] ==
+                                              1
+                                          ? true
+                                          : false,
+                                      onChanged: (bool value) async {
+                                        await orederController.updateOrderState(
+                                            value ? 1 : 0,
+                                            orederController.orders[i]
+                                                ['order_Id']);
+
+                                        orederController.switchOrderState(
+                                            i, value);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              )),
+                        ),
                       );
                     },
                   ),

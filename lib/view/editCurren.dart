@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:welcom/controller/currencyController.dart';
 import 'package:welcom/controller/sidebarcontroller.dart';
-import 'package:welcom/view/sidebar.dart';
+
 
 class EditCurr extends StatelessWidget {
   EditCurr({super.key});
@@ -78,20 +78,14 @@ class EditCurr extends StatelessWidget {
             minWidth: double.infinity,
             height: 60,
             onPressed: () async {
-              // sideBarController.index.value = 1;
-              Map<String, String> currency = {
-                'curreny_name': currname.text,
-                'currency_symbol': currsymbol.text,
-                'rate': currrate.text,
-              };
-              await currencyController.updateCurrency(
-                  'currency', currency, Get.arguments['id']);
-              print(sideBarController.index.value);
-              currencyController.currency.clear();
-              currencyController.readData2();
-              Get.off(() => SideBarPage());
-
-              //Get.to(() => sideBarController.pages[p]);
+              //  Currency currency =Currency()
+              // await currencyController.updateCurrency(
+              //     // 'currency', currency, Get.arguments['id']);
+                  
+              // // print(sideBarController.index.value);
+              // currencyController.currency.clear();
+              // currencyController.readData2();
+              // Get.off(() => SideBarPage());
             },
             color: Colors.greenAccent,
             elevation: 0,

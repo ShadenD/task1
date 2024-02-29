@@ -52,7 +52,7 @@ class SideBarPage extends GetView<SideBarController> {
                   Get.back();
                 },
                 selected: sideBarController.index.value == 2,
-              )
+              ),
             ],
           ),
         ),
@@ -60,13 +60,17 @@ class SideBarPage extends GetView<SideBarController> {
       body: Row(children: [
         Expanded(
             flex: 8,
-            child: Obx(
-                () => sideBarController.pages[sideBarController.index.value])),
+            child: Obx(() {
+              var n = sideBarController.pages[sideBarController.index.value];
+              return n;
+            })),
       ]),
     );
   }
 }
 
 appName() {
-  return Obx(() => Text('${sideBarController.nameppbar()}'));
+  return Builder(builder: (context) {
+    return Obx(() => Text('${sideBarController.nameppbar()}'));
+  });
 }

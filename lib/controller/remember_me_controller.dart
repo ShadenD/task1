@@ -14,9 +14,9 @@ class RememberMeController extends GetxController {
     super.onInit();
   }
 
-  void toggleRememberMe(bool value) {
-    rememberMe.value = value;
-    storage.write('rememberMe', value);
+   toggleRememberMe(value) {
+    rememberMe.value = value!;
+    // storage.write('rememberMe', value);
  
   }
 }

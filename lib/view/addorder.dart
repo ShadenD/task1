@@ -1,4 +1,4 @@
-// ignore_for_file: must_be_immutable, non_constant_identifier_names, avoid_types_as_parameter_names, avoid_print
+// ignore_for_file: must_be_immutable, non_constant_identifier_names, avoid_types_as_parameter_names, avoid_print, unused_element, unused_local_variable, unrelated_type_equality_checks
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -6,7 +6,8 @@ import 'package:welcom/controller/archivecontroller.dart';
 import 'package:welcom/controller/currencyController.dart';
 import 'package:welcom/controller/dropdowncontroller.dart';
 import 'package:welcom/controller/ordercontroller.dart';
-import 'package:welcom/view/sidebar.dart';
+import 'package:welcom/model/order.dart';
+import 'package:welcom/model/orderArguments.dart';
 
 class Add extends GetView<OrederController> {
   Add({super.key});
@@ -23,6 +24,46 @@ class Add extends GetView<OrederController> {
 
   @override
   Widget build(BuildContext context) {
+    List<String> types = [
+      "Sell Order",
+      "Purshased Order",
+      "Return Sell Order",
+      "Return Purshased Order"
+    ];
+    // getUser() async {
+    //   OrderArgument orderArgument = Get.arguments;
+    //   var user1 = await ordercontroller.getUsers(orderArgument.order.user_id);
+    //   // print(user1);
+    //   ordercontroller.upadateUserId(
+    //       user1[0]['user_id']); // Assuming this is the correct method name
+    // }
+
+    // getCurrency() async {
+    //   OrderArgument orderArgument = Get.arguments;
+    //   var currency1 =
+    //       await ordercontroller.getCurrency(orderArgument.order.curr_id);
+    //   ordercontroller.upadateCurrencyId(
+    //       currency1[0]['curr_id']); // Assuming this is the correct method name
+    //   ordercontroller.updateRate(
+    //       currency1[0]['rate']); // Assuming this is the correct method name
+    // }
+
+    if (Get.arguments != null) {
+      OrderArgument orderArgument = Get.arguments;
+      ordercontroller.updateRate(orderArgument.currency.rate);
+      controller.upadateCurrencyId(orderArgument.order.curr_id);
+      controller.upadateUserId(orderArgument.order.user_id);
+      datecontroller.text = orderArgument.order.order_date;
+      amountcontroller.text = orderArgument.order.order_amount.toString();
+      equalamountcontroller.text =
+          orderArgument.order.equal_order_amount.toString();
+      dropDownListController.selectedCurrency.value =
+          orderArgument.order.curr_id;
+      dropDownListController.selectedUser.value = orderArgument.order.user_id;
+      dropDownListController.selectedType.value = orderArgument.order.type;
+      controller.isChecked.value =
+          orderArgument.order.status == 1 ? true : false;
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -106,11 +147,11 @@ class Add extends GetView<OrederController> {
                         return DropdownMenuItem(
                             onTap: () {
                               ordercontroller
-                                  .upadateCurrencyId(value['currency_id']);
+                                  .upadateCurrencyId(value['currencyId']);
                               ordercontroller.updateRate(value['rate']);
                             },
-                            value: value['currency_id'],
-                            child: Text(value['curreny_name'].toString()));
+                            value: value['currencyId'],
+                            child: Text(value['currencyName'].toString()));
                       }).toList(),
                     ),
                   ),
@@ -267,20 +308,25 @@ class Add extends GetView<OrederController> {
                 ElevatedButton(
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
-                      Map<String, dynamic> order1 = {
-                        "order_date": datecontroller.text,
-                        "order_amount": amountcontroller.text,
-                        "equal_order_amount": equalamountcontroller.text,
-                        "curr_id": ordercontroller.currencyId.value,
-                        "status": ordercontroller.isChecked.value ? 1 : 0,
-                        "type": ordercontroller.item.value,
-                        "user_id": ordercontroller.userId.value,
-                      };
-                      await ordercontroller.insert('orders', order1);
-                      // await ordercontroller.insertorder(order);
-                      controller.orders.clear();
-                      controller.readDataOrder();
-                      Get.off(() => SideBarPage());
+                      Orderss orders = Orderss(
+                        order_date: datecontroller.text,
+                        order_amount: int.parse(amountcontroller.text),
+                        equal_order_amount:
+                            double.parse(equalamountcontroller.text),
+                        curr_id: ordercontroller.currencyId.value,
+                        status:
+                            ordercontroller.isChecked.value == 1 ? true : false,
+                        type: ordercontroller.item.value,
+                        user_id: ordercontroller.userId.value,
+                      );
+                      // print(Get.arguments);
+                      if (Get.arguments == null) {
+                        await ordercontroller.insert('orders', orders);
+                      } else {
+                        await ordercontroller.updateOrders(
+                            'orders', orders, Get.arguments.id);
+                      }
+                      Get.back();
                     }
                   },
                   child: const Text('ADD ORDER'),

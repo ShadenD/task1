@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable, avoid_print
 import 'dart:io';
+
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pw_validator/flutter_pw_validator.dart';
@@ -7,8 +8,9 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:welcom/controller/archivecontroller.dart';
 import 'package:welcom/controller/signupcontroller.dart';
-import 'package:welcom/view/login2.dart';
 import 'package:welcom/model/sqlitedb2.dart';
+import 'package:welcom/model/user.dart';
+import 'package:welcom/view/login2.dart';
 
 class SignupPage extends GetView<SignupPageController> {
   SignupPage({super.key});
@@ -19,6 +21,11 @@ class SignupPage extends GetView<SignupPageController> {
   String? vall;
   @override
   Widget build(BuildContext context) {
+    if (Get.arguments != null) {
+      controller3.textEditingController.text = Get.arguments!['email'];
+      controller3.userEditingController.text = Get.arguments!['username'];
+      controller3.passEditingController.text = Get.arguments!['pass'];
+    }
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
@@ -65,9 +72,6 @@ class SignupPage extends GetView<SignupPageController> {
                       )),
                 ],
               ),
-              // const SizedBox(
-              //   height: 40,
-              // ),
               Form(
                 key: controller3.formstate,
                 child: Column(
@@ -145,7 +149,6 @@ class SignupPage extends GetView<SignupPageController> {
                             controller: controller3.textEditingController,
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
-                              //  controller3.validemail(value);
                               vall = value!;
                               if (value.isEmpty) {
                                 return "الحقل فارغ";
@@ -220,8 +223,6 @@ class SignupPage extends GetView<SignupPageController> {
                         duration: const Duration(milliseconds: 1200),
                         child: Obx(
                           () => TextFormField(
-                            // onChanged: (password) =>
-                            //     controller3.onPasswordChanged(password),
                             obscureText: controller3.passToggle.value,
                             decoration: InputDecoration(
                               suffix: InkWell(
@@ -280,8 +281,6 @@ class SignupPage extends GetView<SignupPageController> {
                         duration: const Duration(milliseconds: 1200),
                         child: Obx(
                           () => TextFormField(
-                            // onChanged: (password) =>
-                            //     controller3.onPasswordChanged(password),
                             obscureText: controller3.passToggle.value,
                             decoration: InputDecoration(
                               suffix: InkWell(
@@ -366,18 +365,34 @@ class SignupPage extends GetView<SignupPageController> {
                       minWidth: double.infinity,
                       height: 60,
                       onPressed: () async {
+                        Users myObject = Users(
+                            username: controller3.userEditingController.text,
+                            email: controller3.textEditingController.text,
+                            pass: controller3.passEditingController.text,
+                            bod: '20-2-2000',
+                            photo: controller3.selectedImagePath.value);
                         if (controller3.formstate.currentState!.validate()) {
-                          await controller2.inseretuser({
-                            'username': controller3.userEditingController.text,
-                            'email': controller3.textEditingController.text,
-                            'pass': controller3.passEditingController.text,
-                            'photo': controller3.selectedImagePath.value,
-                          });
+                          if (Get.arguments == null) {
+                            await controller2.inseretuser('users', myObject);
+                          } else {
+                            await controller2.updateUser(
+                                'users', myObject, Get.arguments['id']);
+                          }
+                          // if (sharedPreferences != null) {
+                          //   Get.to(Get.to(() => SideBarPage()));
+                          // } else {
+                          //   Get.to(Get.to(() => Loginpage2()));
+                          // }
                           print("Data filled successfully");
+                          controller3.textEditingController.clear();
                           controller3.textEditingController.clear();
                           controller3.passEditingController.clear();
                           controller3.confirmpassword.clear();
                         }
+                        print(controller2.users);
+                        Get.back();
+                        // controller2.users.clear();
+                        // controller2.readData();
                       },
                       color: Colors.greenAccent,
                       elevation: 0,

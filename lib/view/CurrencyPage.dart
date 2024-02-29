@@ -3,21 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:welcom/controller/currencyController.dart';
 import 'package:welcom/view/addCurrency.dart';
-// import 'package:welcom/controller/drawercontroller.dart';
-import 'package:welcom/view/editCurren.dart';
-// import 'package:welcom/widget/navigatorRail.dart';
 
 // ignore: must_be_immutable
 class Currency extends GetView<CurrencyController> {
   Currency({super.key});
   var scaffoldKey2 = GlobalKey<ScaffoldState>();
   TextEditingController teSeach1 = TextEditingController();
-  // NavigationController controllerDrawer = Get.put(NavigationController());
   CurrencyController controllerCurrency = Get.put(CurrencyController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // key: scaffoldKey2,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.white,
@@ -26,15 +21,19 @@ class Currency extends GetView<CurrencyController> {
           onPressed: () {
             Get.to(() => AddCurr());
           }),
-      // extendBodyBehindAppBar: true,
       body: Row(children: [
         Expanded(
           child: Column(
             children: [
               Padding(
                 padding: const EdgeInsets.all(15.0),
-                child: TextFormField(
-                  onChanged: (value) {
+                child: TextField(
+                  onSubmitted: (value) async {
+                    await controller.filter(teSeach1.text);
+                  },
+                  onChanged: (value) async {
+                    //FocusScope.of(context).unfocus();
+                    await controllerCurrency.filter(teSeach1.text);
                     if (value == '') {
                       controllerCurrency.currency.clear();
                       controllerCurrency.readData2();
@@ -73,7 +72,7 @@ class Currency extends GetView<CurrencyController> {
                             child: ListTile(
                               dense: false,
                               leading: Text(
-                                  '${controller.currency[i]['currency_symbol']}'),
+                                  '${controller.currency[i]['currencySymbol']}'),
                               title: Column(children: [
                                 Text(
                                   "${controller.currency[i]['rate']}",
@@ -83,7 +82,7 @@ class Currency extends GetView<CurrencyController> {
                                 ),
                               ]),
                               subtitle: Text(
-                                "${controller.currency[i]['curreny_name']}",
+                                "${controller.currency[i]['currencyName']}",
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 20),
                               ),
@@ -94,7 +93,7 @@ class Currency extends GetView<CurrencyController> {
                                         onPressed: () async {
                                           await controllerCurrency.delete(
                                               controllerCurrency.currency[i]
-                                                  ['currency_id']);
+                                                  ['currencyId']);
                                           print("delete currency");
                                         },
                                         icon: const Icon(
@@ -103,22 +102,23 @@ class Currency extends GetView<CurrencyController> {
                                         )),
                                     IconButton(
                                         onPressed: () async {
-                                          Get.to(EditCurr(), arguments: {
-                                            'id': controller.currency[i]
-                                                ['currency_id'],
-                                            'curreny_name': controller
-                                                .currency[i]['curreny_name']
+                                          Get.to(AddCurr(), arguments: {
+                                            "currencyId": controller.currency[i]
+                                                    ['currencyId']
                                                 .toString(),
-                                            'currency_symbol': controller
-                                                .currency[i]['currency_symbol']
+                                            'currencyName': controller
+                                                .currency[i]['currencyName']!
+                                                .toString(),
+                                            'currencySymbol': controller
+                                                .currency[i]['currencySymbol']!
                                                 .toString(),
                                             'rate': controller.currency[i]
-                                                    ['rate']
-                                                .toString(),
+                                                    ['rate']!
+                                                .toString()
                                           });
                                         },
                                         icon: const Icon(
-                                          Icons.update,
+                                          Icons.edit_outlined,
                                           color: Colors.black,
                                         )),
                                   ]),

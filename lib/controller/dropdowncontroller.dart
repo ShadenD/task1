@@ -15,6 +15,9 @@ class DropDownListController extends GetxController {
       "Return Purshased Order"
     ];
 
+  void updateSelectedType(String value) {
+    selectedType.value = value;
+  }
   void updateSelectedItem(value) {
     selectedItems.value = value;
   }

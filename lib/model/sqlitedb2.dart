@@ -1,8 +1,10 @@
 // ignore_for_file: unused_import, avoid_print
 
-import 'package:sqflite/sqflite.dart'; // تحتوي على ال join
 // ignore: depend_on_referenced_packages
+import 'dart:ffi';
+
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart'; // تحتوي على ال join
 import 'package:welcom/model/user.dart';
 
 class SqlDB {
@@ -51,29 +53,30 @@ CREATE TABLE "users"(
 
 )
     ''');
-    await db.execute('''
-CREATE TABLE "orders"(
-"order_id" INTEGER  PRIMARY KEY AUTOINCREMENT,
-"order_date" TEXT NOT NULL,
-"order_amount" INTEGER NOT NULL,
-"equal_order_amount" INTEGER NOT NULL,
-"curr_id" INTEGER NOT NULL,
-"status" BOOLEAN NOT NULL,
-"type" TEXT NOT NULL,
-"user_id" INTEGER NOT NULL,
-FOREIGN KEY (curr_id) REFERENCES currency(currency_id),
-FOREIGN KEY (user_id) REFERENCES users(id)
 
-)
-    ''');
     await db.execute('''
-CREATE TABLE "currency"(
-"currency_id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-"curreny_name" TEXT NOT NULL,
-"currency_symbol" TEXT NOT NULL,
-"rate" REAL NOT NULL
-)
-    ''');
+      CREATE TABLE "currency"(
+        "currencyId" INTEGER  PRIMARY KEY AUTOINCREMENT,
+        "currencyName" TEXT NOT NULL,
+        "currencySymbol" TEXT NOT NULL,
+        "rate" REAL NOT NULL
+      )
+
+ ''');
+    await db.execute(''' 
+      CREATE TABLE "orders"(
+        "order_id" INTEGER  PRIMARY KEY AUTOINCREMENT,
+        "order_date" TEXT NOT NULL,
+        "order_amount" INTEGER NOT NULL,
+        "equal_order_amount" INTEGER NOT NULL,
+        "curr_id" INTEGER NOT NULL,
+        "status" BOOLEAN NOT NULL,
+        "type" TEXT NOT NULL,
+        "user_id" INTEGER NOT NULL,
+        FOREIGN KEY (curr_id) REFERENCES currency(currency_id),
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )     
+''');
   }
 
   // ما دام الفنكشن future لازم await
@@ -85,11 +88,23 @@ CREATE TABLE "currency"(
     return response;
   }
 
-  insertData(String sql) async {
+  read(String table) async {
     Database? mydb = await db;
-    int response = await mydb!.rawInsert(sql);
+    List<Map> response = await mydb!.query(table);
     return response;
   }
+    
+  getReadOne(String sql) async {
+    Database? mydb = await db;
+    List<Map> response = await mydb!.rawQuery(sql);
+    return response;
+  }
+
+  // insertData(String sql) async {
+  //   Database? mydb = await db;
+  //   int response = await mydb!.rawInsert(sql);
+  //   return response;
+  // }
 
   updateData(String sql) async {
     Database? mydb = await db;
@@ -134,9 +149,15 @@ CREATE TABLE "currency"(
     return response;
   }
 
-  update(String table, Map<String, String> user, String where) async {
+  update(String table, Map<String, dynamic> user, String where) async {
     Database? mydb = await db;
     int response = await mydb!.update(table, user, where: where);
+    return response;
+  }
+  
+  getOne(String table, String where, List<String> list) async {
+    Database? mydb = await db;
+    List<Map> response = await mydb!.query(table, where: where);
     return response;
   }
 }
