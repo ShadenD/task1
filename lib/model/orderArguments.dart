@@ -1,3 +1,4 @@
+// ignore_for_file: file_names
 import 'package:welcom/model/currency.dart';
 import 'package:welcom/model/order.dart';
 

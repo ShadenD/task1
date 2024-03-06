@@ -300,8 +300,8 @@ class Orders extends GetView<OrederController> {
                                             orederController.orders[i]
                                                 ['order_Id']);
 
-                                        orederController.switchOrderState(
-                                            i, value);
+                                        // orederController.switchOrderState(
+                                        //     i, value);
                                       },
                                     ),
                                   ),

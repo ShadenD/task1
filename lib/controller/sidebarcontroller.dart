@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:welcom/main.dart';
 import 'package:welcom/view/CurrencyPage.dart';
 import 'package:welcom/view/OrderPage.dart';
@@ -23,10 +24,12 @@ class SideBarController extends GetxController {
     return text.value;
   }
 
+  Future<void> handleSignOut() => GoogleSignIn().disconnect();
   logout() {
     return IconButton(
         onPressed: () {
           sharedPreferences!.clear();
+          handleSignOut();
           Get.to(() => Loginpage2());
         },
         icon: const Icon(Icons.logout));

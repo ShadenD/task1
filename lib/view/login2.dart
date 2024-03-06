@@ -1,7 +1,9 @@
-// ignore_for_file: must_be_immutable, annotate_overrides
+// ignore_for_file: must_be_immutable, annotate_overrides, avoid_print
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:welcom/controller/facebookController.dart';
 import 'package:welcom/controller/logincontroller.dart';
 import 'package:welcom/controller/remember_me_controller.dart';
 import 'package:welcom/main.dart';
@@ -9,6 +11,7 @@ import 'package:welcom/model/sqlitedb2.dart';
 import 'package:welcom/view/home.dart';
 import 'package:welcom/view/sidebar.dart';
 import 'package:welcom/view/signup1.dart';
+// import 'package:http/http.dart' as http;
 
 class Loginpage2 extends GetView<LoginPageController> {
   Loginpage2({super.key});
@@ -18,6 +21,7 @@ class Loginpage2 extends GetView<LoginPageController> {
   bool passToggle = true;
   LoginPageController controller2 = Get.put(LoginPageController());
   RememberMeController controllerr = Get.put(RememberMeController());
+  FacebookLogin facebookLogin = Get.put(FacebookLogin());
 
   SqlDB sqldb = SqlDB();
   bool rem = false;
@@ -229,6 +233,10 @@ class Loginpage2 extends GetView<LoginPageController> {
                       ],
                     ),
                   ),
+                  Obx(() => Text(
+                        controller2.alert.value,
+                        style: const TextStyle(color: Colors.red),
+                      )),
                   FadeInUp(
                       duration: const Duration(milliseconds: 1400),
                       child: Padding(
@@ -250,12 +258,9 @@ class Loginpage2 extends GetView<LoginPageController> {
                               if (formstate.currentState!.validate()) {
                                 List<Map> response2 = await sqldb.readData(
                                     "SELECT * FROM users WHERE email='${controller2.textEditingController.text}'");
-                                // ignore: avoid_print
                                 print(response2);
-                                // ignore: avoid_print
                                 print(sharedPreferences);
                                 if (response2.isEmpty) {
-                                  // ignore: avoid_print
                                   print(
                                       'User with the provided email does not exist!');
                                 } else {
@@ -273,6 +278,74 @@ class Loginpage2 extends GetView<LoginPageController> {
                                   fontWeight: FontWeight.w600, fontSize: 18),
                             ),
                           ),
+                        ),
+                      )),
+                  FadeInUp(
+                      duration: const Duration(milliseconds: 1400),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        child: Container(
+                          padding: const EdgeInsets.only(top: 3, left: 3),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              border: const Border(
+                                bottom: BorderSide(color: Colors.black),
+                                top: BorderSide(color: Colors.black),
+                                left: BorderSide(color: Colors.black),
+                                right: BorderSide(color: Colors.black),
+                              )),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                InkWell(
+                                  onTap: () async {
+                                    facebookLogin.signInWithFacebook();
+                                    // Future<Null> _login() async {
+                                    //   final FacebookLoginResult result =
+                                    //       await facebookSignIn.logIn(['email']);
+
+                                    //   switch (result.status) {
+                                    //     case FacebookLoginStatus.loggedIn:
+                                    //       final FacebookAccessToken accessToken = result.accessToken;
+                                    //       _showMessage('''
+                                    //        Logged in!
+
+                                    //        Token: ${accessToken.token}
+                                    //        User id: ${accessToken.userId}
+                                    //        Expires: ${accessToken.expires}
+                                    //        Permissions: ${accessToken.permissions}
+                                    //        Declined permissions: ${accessToken.declinedPermissions}
+                                    //        ''');
+                                    //       break;
+                                    //     case FacebookLoginStatus.cancelledByUser:
+                                    //       _showMessage('Login cancelled by the user.');
+                                    //       break;
+                                    //     case FacebookLoginStatus.error:
+                                    //       _showMessage('Something went wrong with the login process.\n'
+                                    //           'Here\'s the error Facebook gave us: ${result.errorMessage}');
+                                    //       break;
+                                    //   }
+                                    // }
+                                  },
+                                  child: const Icon(
+                                    FontAwesomeIcons.facebook,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 30,
+                                ),
+                                InkWell(
+                                  onTap: () async {
+                                    controller2.signInWithGoogle();
+                                    controller2.handleSignOut();
+                                  },
+                                  child: const Icon(
+                                    FontAwesomeIcons.google,
+                                    size: 20,
+                                  ),
+                                ),
+                              ]),
                         ),
                       )),
                   FadeInUp(

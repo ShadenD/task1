@@ -8,7 +8,7 @@ class AuthMiddleware extends GetMiddleware {
     // ignore: unrelated_type_equality_checks
     if (sharedPreferences!.getString('email') != null) {
       return const RouteSettings(name: "/sidebar");
-    } else  {
+    } else {
       return const RouteSettings(name: "/login");
     }
   }

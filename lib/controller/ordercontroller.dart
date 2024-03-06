@@ -113,9 +113,9 @@ class OrederController extends GetxController {
     }
   }
 
-  switchOrderState(int index, bool value) {
-    states![index] = value ? 1 : 0;
-  }
+  // switchOrderState(int index, bool value) {
+  //   states![index] = value ? 1 : 0;
+  // }
 
   updateOrders(String table, Orderss order, int id) async {
     Map<String, dynamic> orderMap = order.toMap();

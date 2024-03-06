@@ -19,8 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.4 <4.0.0'
-
+  sdk: '>=2.18.5 <3.0.0' 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -61,6 +60,12 @@ dependencies:
   invoiceninja: ^0.0.11
   date_time: ^0.10.0
   google_fonts: ^4.0.4
+  google_sign_in: ^6.2.1
+  firebase_auth: ^4.17.6
+  font_awesome_flutter: ^10.7.0
+  firebase_core: ^2.25.5
+  flutter_facebook_auth: ^4.1.1
+ 
 
 dev_dependencies:
   flutter_test:
