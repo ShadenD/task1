@@ -2,9 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:welcom/api/firebase_notification.dart';
 import 'package:welcom/controller/archivecontroller.dart';
 import 'package:welcom/controller/currencyController.dart';
 import 'package:welcom/controller/dropdowncontroller.dart';
+import 'package:welcom/controller/notificationController.dart';
 import 'package:welcom/controller/ordercontroller.dart';
 import 'package:welcom/model/order.dart';
 import 'package:welcom/model/orderArguments.dart';
@@ -19,6 +21,8 @@ class Add extends GetView<OrederController> {
   CurrencyController currencyController = Get.put(CurrencyController());
   OrederController ordercontroller = Get.put(OrederController());
   ArchiveController usercontroller = Get.put(ArchiveController());
+  NotificationController notificationController =
+      Get.put(NotificationController());
 
   final formKey = GlobalKey<FormState>();
 
@@ -319,12 +323,19 @@ class Add extends GetView<OrederController> {
                         type: ordercontroller.item.value,
                         user_id: ordercontroller.userId.value,
                       );
-                      // print(Get.arguments);
                       if (Get.arguments == null) {
                         await ordercontroller.insert('orders', orders);
+                        await Notifications1()
+                            .sendMessage('hi', 'you add Order', 'aa');
+                        await Notifications1().initNotifications();
+                        notificationController.increase();
                       } else {
                         await ordercontroller.updateOrders(
                             'orders', orders, Get.arguments.id);
+                        await Notifications1()
+                            .sendMessage('hi', 'you update Order', 'aa');
+                        await Notifications1().initNotifications();
+                        notificationController.increase();
                       }
                       Get.back();
                     }

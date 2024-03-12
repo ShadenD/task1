@@ -6,8 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pw_validator/flutter_pw_validator.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:welcom/api/firebase_notification.dart';
 import 'package:welcom/controller/archivecontroller.dart';
+import 'package:welcom/controller/notificationController.dart';
 import 'package:welcom/controller/signupcontroller.dart';
+import 'package:welcom/main.dart';
 import 'package:welcom/model/sqlitedb2.dart';
 import 'package:welcom/model/user.dart';
 import 'package:welcom/view/login2.dart';
@@ -16,7 +19,8 @@ class SignupPage extends GetView<SignupPageController> {
   SignupPage({super.key});
   SignupPageController controller3 = Get.put(SignupPageController());
   ArchiveController controller2 = Get.put(ArchiveController());
-
+  NotificationController notificationController =
+      Get.put(NotificationController());
   SqlDB sqldb = SqlDB();
   String? vall;
   @override
@@ -30,18 +34,13 @@ class SignupPage extends GetView<SignupPageController> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
+        title: sharedPreferences!.getString('email') != null
+            ? Get.arguments == null
+                ? const Text("SignUp")
+                : const Text("UPDATE")
+            : const Text("SignUp"),
         elevation: 0,
         backgroundColor: Colors.white,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            size: 20,
-            color: Colors.black,
-          ),
-        ),
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -54,13 +53,6 @@ class SignupPage extends GetView<SignupPageController> {
             children: [
               Column(
                 children: [
-                  FadeInUp(
-                      duration: const Duration(milliseconds: 1000),
-                      child: const Text(
-                        "Sign up",
-                        style: TextStyle(
-                            fontSize: 30, fontWeight: FontWeight.bold),
-                      )),
                   const SizedBox(
                     height: 20,
                   ),
@@ -374,15 +366,18 @@ class SignupPage extends GetView<SignupPageController> {
                         if (controller3.formstate.currentState!.validate()) {
                           if (Get.arguments == null) {
                             await controller2.inseretuser('users', myObject);
+                            await Notifications1()
+                                .sendMessage('hi', 'you add user', 'aa');
+                            await Notifications1().initNotifications();
+                            notificationController.increase();
                           } else {
                             await controller2.updateUser(
                                 'users', myObject, Get.arguments['id']);
+                            await Notifications1()
+                                .sendMessage('hi', 'you update user', 'aa');
+                            await Notifications1().initNotifications();
+                            notificationController.increase();
                           }
-                          // if (sharedPreferences != null) {
-                          //   Get.to(Get.to(() => SideBarPage()));
-                          // } else {
-                          //   Get.to(Get.to(() => Loginpage2()));
-                          // }
                           print("Data filled successfully");
                           controller3.textEditingController.clear();
                           controller3.textEditingController.clear();

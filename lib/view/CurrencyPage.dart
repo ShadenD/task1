@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:welcom/controller/currencyController.dart';
+import 'package:welcom/controller/notificationController.dart';
 import 'package:welcom/view/addCurrency.dart';
 
 // ignore: must_be_immutable
@@ -10,6 +11,8 @@ class Currency extends GetView<CurrencyController> {
   var scaffoldKey2 = GlobalKey<ScaffoldState>();
   TextEditingController teSeach1 = TextEditingController();
   CurrencyController controllerCurrency = Get.put(CurrencyController());
+  NotificationController notificationController =
+      Get.put(NotificationController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,6 +23,7 @@ class Currency extends GetView<CurrencyController> {
           child: const Icon(Icons.add),
           onPressed: () {
             Get.to(() => AddCurr());
+            // notificationController.decrease();
           }),
       body: Row(children: [
         Expanded(

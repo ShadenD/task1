@@ -1,14 +1,19 @@
 // ignore_for_file: must_be_immutable, unnecessary_string_interpolations
 
+import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:welcom/controller/notificationController.dart';
 import 'package:welcom/controller/sidebarcontroller.dart';
+import 'package:welcom/view/local_notifications.dart';
 
 SideBarController sideBarController = Get.put(SideBarController());
 
 class SideBarPage extends GetView<SideBarController> {
   SideBarPage({super.key});
   SideBarController sideBarController = Get.put(SideBarController());
+  NotificationController notificationController =
+      Get.put(NotificationController());
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +22,25 @@ class SideBarPage extends GetView<SideBarController> {
         title: appName(),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          Obx(
+            () => badges.Badge(
+              position: badges.BadgePosition.custom(),
+              badgeContent: Text("${notificationController.count}"),
+              child: IconButton(
+                onPressed: () {
+                  Get.to(() => LocalNotification());
+                  notificationController.zero();
+                },
+                icon: const Icon(
+                  Icons.notifications,
+                  size: 30,
+                ),
+              ),
+            ),
+          ),
+          // const SizedBox(
+          //   width: 10,
+          // ),
           sideBarController.logout(),
         ],
       ),

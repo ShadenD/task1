@@ -1,5 +1,4 @@
 // ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -9,7 +8,6 @@ import 'package:welcom/view/OrderPage.dart';
 import 'package:welcom/view/login2.dart';
 import 'package:welcom/view/signup1.dart';
 import 'package:welcom/view/userPage.dart';
-
 class SideBarController extends GetxController {
   RxInt index = 0.obs;
   RxString text = ''.obs;
@@ -23,7 +21,6 @@ class SideBarController extends GetxController {
     }
     return text.value;
   }
-
   Future<void> handleSignOut() => GoogleSignIn().disconnect();
   logout() {
     return IconButton(
@@ -34,7 +31,6 @@ class SideBarController extends GetxController {
         },
         icon: const Icon(Icons.logout));
   }
-
   add() {
     if (index.value == 0) {
       return IconButton(
@@ -50,4 +46,5 @@ class SideBarController extends GetxController {
     Currency(),
     Orders(),
   ].obs;
+  
 }

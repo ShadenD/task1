@@ -1,9 +1,14 @@
 // ignore_for_file: unnecessary_null_comparison, avoid_print
 
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:welcom/model/sqlitedb2.dart';
 import 'package:welcom/model/user.dart';
 import 'package:welcom/view/sidebar.dart';
@@ -14,13 +19,10 @@ class LoginPageController extends GetxController {
   TextEditingController passEditingController = TextEditingController();
   RxBool passToggle = true.obs;
   RxString alert = ''.obs;
-
   Future signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
     final GoogleSignInAuthentication? googleAuth =
         await googleUser?.authentication;
-
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
@@ -29,13 +31,21 @@ class LoginPageController extends GetxController {
     // Once signed in, return the UserCredential
     UserCredential userCredential =
         await FirebaseAuth.instance.signInWithCredential(credential);
+    final http.Response googleImage =
+        await http.get(Uri.parse(userCredential.user!.photoURL.toString()));
+    Uint8List uint8list = googleImage.bodyBytes;
+    var buffer = uint8list.buffer;
+    ByteData byteData = ByteData.view(buffer);
+    var tempDir = await getTemporaryDirectory();
+    File file = await File('${tempDir.path}/png').writeAsBytes(
+        buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
     if (userCredential != null) {
       Users users = Users(
           username: userCredential.user!.displayName.toString(),
           email: userCredential.user!.email.toString(),
           pass: '',
           bod: '',
-          photo: '');
+          photo: file.path);
       List<Map> reg = await login(userCredential.user!.email.toString());
       if (reg.isEmpty) {
         print('User with the provided email does not exist!');

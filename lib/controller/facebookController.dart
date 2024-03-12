@@ -1,33 +1,60 @@
-// ignore_for_file: file_names, unused_local_variable, avoid_print
+// ignore_for_file: file_names, unused_local_variable, avoid_print, unnecessary_null_comparison
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:get/get.dart';
+import 'package:welcom/model/sqlitedb2.dart';
+import 'package:welcom/model/user.dart';
+import 'package:welcom/view/sidebar.dart';
 
 class FacebookLogin extends GetxController {
-  Future<void> signInWithFacebook() async {
-    // FacebookAuth.instance.webAndDesktopInitialize(
-   //     appId: "328682493009239", cookie: true, xfbml: true, version: "v15.0");
-    try {
-      // Trigger the Facebook sign-in flow
-      final LoginResult result = await FacebookAuth.instance.login();
+  SqlDB sqldb = SqlDB();
+  RxString alert = ''.obs;
+  Future signInWithFacebook() async {
+    final LoginResult loginResult = await FacebookAuth.instance.login();
+    if (loginResult != null && loginResult.accessToken != null) {
+      try {
+        Future<void> handleFacebookSignOut() async {
+          await FacebookAuth.instance.logOut();
+        }
 
-      // Check if the user successfully signed in
-      if (result.status == LoginStatus.success) {
-        // Retrieve the access token
-        final AccessToken accessToken = result.accessToken!;
+        login(String email) async {
+          List<Map> response2 =
+              await sqldb.readData("SELECT * FROM users WHERE email='$email'");
+          return response2;
+        }
 
-        // Use the access token to fetch the user's profile data
-        final userData = await FacebookAuth.instance.getUserData();
-
-        // Do something with the user's profile data
-        print(userData);
-      } else {
-        // Handle sign-in failure
-        print('Facebook sign-in failed');
+        final OAuthCredential facebookAuthCredential =
+            FacebookAuthProvider.credential(loginResult.accessToken!.token);
+        final UserCredential userCredential = await FirebaseAuth.instance
+            .signInWithCredential(facebookAuthCredential);
+        print('User logged in: ${userCredential.user!.displayName}');
+        // Navigate to the next screen or perform other actions after successful login
+        if (userCredential != null) {
+          Users users = Users(
+              username: userCredential.user!.displayName.toString(),
+              email: userCredential.user!.email.toString(),
+              pass: '',
+              bod: '',
+              photo: "file.path");
+          List<Map> reg = await login(userCredential.user!.email.toString());
+          if (reg.isEmpty) {
+            print('User with the provided email does not exist!');
+            Map<String, dynamic> userMap = users.toMap();
+            await sqldb.insert('users', userMap);
+            Get.to(() => SideBarPage());
+            // Get.to(() => Archives());
+          } else {
+            alert.value = "This email was registered";
+            print("Error");
+            handleFacebookSignOut();
+          }
+        }
+      } catch (e) {
+        print('Failed to sign in with Facebook: $e');
       }
-    } catch (e) {
-      // Handle any errors that occur during the sign-in process
-      print('Error signing in with Facebook: $e');
+    } else {
+      print('Facebook login was not successful');
     }
   }
 }
