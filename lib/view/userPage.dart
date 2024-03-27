@@ -109,22 +109,22 @@ class Archives extends GetView<ArchiveController> {
                                         )),
                                     IconButton(
                                         onPressed: () async {
-                                          Get.to(SignupPage(), arguments: {
-                                            "id": archivecontroller.users[i]
-                                                ['id'],
-                                            "username": archivecontroller
-                                                .users[i]['username']
-                                                .toString(),
-                                            "email": archivecontroller.users[i]
-                                                    ['email']
-                                                .toString(),
-                                            "pass": archivecontroller.users[i]
-                                                    ['pass']
-                                                .toString(),
-                                            "photo": archivecontroller.users[i]
-                                                    ['photo']
-                                                .toString(),
-                                          });
+                                          Get.to(SignupPage(),
+                                              arguments: Users(
+                                                username: archivecontroller
+                                                    .users[i]['username']
+                                                    .toString(),
+                                                email: archivecontroller
+                                                    .users[i]['email']
+                                                    .toString(),
+                                                pass: archivecontroller.users[i]
+                                                        ['pass']
+                                                    .toString(),
+                                                photo: archivecontroller
+                                                    .users[i]['photo']
+                                                    .toString(),
+                                                bod: '',
+                                              ));
                                         },
                                         icon: const Icon(
                                           Icons.edit_outlined,

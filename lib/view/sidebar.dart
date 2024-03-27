@@ -77,6 +77,15 @@ class SideBarPage extends GetView<SideBarController> {
                 },
                 selected: sideBarController.index.value == 2,
               ),
+              ListTile(
+                title: const Text(" Items"),
+                leading: const Icon(Icons.production_quantity_limits),
+                onTap: () {
+                  sideBarController.index.value = 3;
+                  Get.back();
+                },
+                selected: sideBarController.index.value == 3,
+              ),
             ],
           ),
         ),

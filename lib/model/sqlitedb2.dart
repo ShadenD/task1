@@ -5,6 +5,7 @@ import 'dart:ffi';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart'; // تحتوي على ال join
+import 'package:welcom/model/itemModel.dart';
 import 'package:welcom/model/user.dart';
 
 class SqlDB {
@@ -63,7 +64,7 @@ CREATE TABLE "users"(
       )
 
  ''');
-    await db.execute(''' 
+    await db.execute('''
       CREATE TABLE "orders"(
         "order_id" INTEGER  PRIMARY KEY AUTOINCREMENT,
         "order_date" TEXT NOT NULL,
@@ -73,10 +74,34 @@ CREATE TABLE "users"(
         "status" BOOLEAN NOT NULL,
         "type" TEXT NOT NULL,
         "user_id" INTEGER NOT NULL,
+        "item_id" INTEGER NOT NULL,
         FOREIGN KEY (curr_id) REFERENCES currency(currency_id),
-        FOREIGN KEY (user_id) REFERENCES users(id)
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (item_id) REFERENCES items(itemId)
+
       )     
 ''');
+    await db.execute('''
+      CREATE TABLE "items"(
+        "itemId" INTEGER  PRIMARY KEY AUTOINCREMENT,
+        "itemName" TEXT NOT NULL,
+        "image" TEXT NOT NULL,
+        "price" REAL NOT NULL,
+        "quantity" INTEGER,
+        "unitTag" TEXT
+
+      )
+
+ ''');
+//     await db.execute('''
+//       CREATE TABLE "cart"(
+//         "cardId" INTEGER  PRIMARY KEY AUTOINCREMENT,
+//         "Name" TEXT NOT NULL,
+//         "image" TEXT NOT NULL,
+//         "price" REAL NOT NULL
+//       )
+
+//  ''');
   }
 
   // ما دام الفنكشن future لازم await
@@ -88,12 +113,19 @@ CREATE TABLE "users"(
     return response;
   }
 
+  getOneOrder(String sql) async {
+    Database? mydb = await db;
+    List<Map> response = await mydb!.rawQuery(sql);
+    return response;
+  }
+
   read(String table) async {
     Database? mydb = await db;
     List<Map> response = await mydb!.query(table);
-    return response;
+    String res = response.toString();
+    return res;
   }
-    
+
   getReadOne(String sql) async {
     Database? mydb = await db;
     List<Map> response = await mydb!.rawQuery(sql);
@@ -143,6 +175,17 @@ CREATE TABLE "users"(
     return response;
   }
 
+  Future<void> insertCartItem(itemModel item) async {
+    Database? mydb = await db;
+    await mydb!.insert('items', item.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<int> deleteItem(int id) async {
+    var mydb = await db;
+    return await mydb!.delete('items', where: 'id = ?', whereArgs: [id]);
+  }
+
   insert(String table, Map<String, dynamic> user) async {
     Database? mydb = await db;
     int response = await mydb!.insert(table, user);
@@ -154,12 +197,45 @@ CREATE TABLE "users"(
     int response = await mydb!.update(table, user, where: where);
     return response;
   }
-  
+
   getOne(String table, String where, List<String> list) async {
     Database? mydb = await db;
     List<Map> response = await mydb!.query(table, where: where);
     return response;
   }
+
+  Future<List<itemModel>> getCartList() async {
+    var mydb = await db;
+    final List<Map<String, Object?>> queryResult = await mydb!.query('items');
+    return queryResult.map((e) => itemModel.fromMap(e)).toList();
+  }
+
+  Future<itemModel> insertItem(itemModel item) async {
+    print(item.toMap());
+    var mydb = await db;
+    await mydb!.insert('items', item.toMap());
+    return item;
+  }
+
+  // Future<int> updateQuantity(itemModel cart) async {
+  //   var mydb = await db;
+  //   return await mydb!.update('items', cart.toMap(),
+  //       where: 'id = ?', whereArgs: [cart.itemId]);
+  // }
+
+  Future<List<itemModel>> getCartItems() async {
+    var mydb = await db;
+    final List<Map<String, dynamic>> maps = await mydb!.query('items');
+    return List.generate(maps.length, (i) {
+      return itemModel(
+        itemName: maps[i]['itemName'],
+        price: maps[i]['price'],
+        quantity: maps[i]['quantity'],
+        unitTag: '',
+        image: maps[i]['image'],
+      );
+    });
+  }
 }
- 
+
 // int: لانهم برجعوا كم سطر نحذف او كم سطر تم اضافته ووووو

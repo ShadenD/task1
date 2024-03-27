@@ -1,19 +1,24 @@
-// ignore_for_file: must_be_immutable, non_constant_identifier_names, avoid_types_as_parameter_names, avoid_print, unused_element, unused_local_variable, unrelated_type_equality_checks
+// ignore_for_file: must_be_immutable, non_constant_identifier_names, avoid_types_as_parameter_names, avoid_print, unused_element, unused_local_variable, unrelated_type_equality_checks, invalid_use_of_protected_member
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:welcom/api/firebase_notification.dart';
 import 'package:welcom/controller/archivecontroller.dart';
+import 'package:welcom/controller/autocomplete.dart';
 import 'package:welcom/controller/currencyController.dart';
 import 'package:welcom/controller/dropdowncontroller.dart';
+import 'package:welcom/controller/itemController.dart';
 import 'package:welcom/controller/notificationController.dart';
 import 'package:welcom/controller/ordercontroller.dart';
+import 'package:welcom/main.dart';
 import 'package:welcom/model/order.dart';
 import 'package:welcom/model/orderArguments.dart';
 
 class Add extends GetView<OrederController> {
   Add({super.key});
   TextEditingController datecontroller = TextEditingController();
+  TextEditingController controllers = TextEditingController();
+
   TextEditingController amountcontroller = TextEditingController();
   TextEditingController equalamountcontroller = TextEditingController();
   DropDownListController dropDownListController =
@@ -23,11 +28,14 @@ class Add extends GetView<OrederController> {
   ArchiveController usercontroller = Get.put(ArchiveController());
   NotificationController notificationController =
       Get.put(NotificationController());
+  itemController itemcontroller = Get.put(itemController());
+  AutoComplete1 autoComplete1 = Get.put(AutoComplete1());
 
   final formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    int id_item = 0;
     List<String> types = [
       "Sell Order",
       "Purshased Order",
@@ -284,28 +292,102 @@ class Add extends GetView<OrederController> {
                   ),
                 ),
                 const SizedBox(
-                  height: 30,
+                  height: 30.0,
                 ),
-                Obx(() => Container(
-                      alignment: Alignment.topCenter,
-                      width: 90,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white),
-                      ),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Checkbox(
-                              value: ordercontroller.isChecked.value,
-                              onChanged: (bool? value) {
-                                ordercontroller.toggleCheck(value);
-                              },
-                            ),
-                            const Text('Paid'),
-                          ]),
-                    )),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Autocomplete<String>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text == '') {
+                        return const Iterable<String>.empty();
+                      } else {
+                        autoComplete1.textcontroller.text =
+                            textEditingValue.text.toString();
+                        return autoComplete1.cartItems.where((element) {
+                          return element
+                              .contains(textEditingValue.text.toLowerCase());
+                        });
+                      }
+                    },
+                    onSelected: (String selectedString2) async {
+                      print(selectedString2);
+                      autoComplete1.addItem(selectedString2);
+                      autoComplete1.read(selectedString2);
+                      await itemcontroller
+                          .getAnyByIdItem(autoComplete1.products.value);
+                      id_item = autoComplete1.products.value;
+                      print('ooooooooooo:   $id_item');
+
+                      // ordercontroller.updateItemId(selectedString2);
+                      // id_item = int.parse('${autoComplete1.products}');
+                      // print(id_item);
+                      print(
+                          'aaaaaaaa: ${sharedPreferences!.getStringList('items')}');
+                      print('select string:  ${autoComplete1.selectedString}');
+                      print('select:   ${autoComplete1.selectedString.value}');
+                    },
+                    fieldViewBuilder:
+                        (context, controller, focusNode, onEditingComplete) {
+                      controllers = controller;
+                      return Container(
+                        width: 350,
+                        height: 80,
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: TextField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          onEditingComplete: onEditingComplete,
+                          decoration: const InputDecoration(
+                            hintText: "Search items",
+                            prefixIcon: Icon(Icons.search),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  child: Card(
+                    child: ListTile(
+                      title: Obx(() {
+                        final selectedString = autoComplete1
+                            .selectedString; // Assuming selectedString is observable
+                        return Text("selected items   $selectedString");
+                      }),
+                    ),
+                  ),
+                ),
+                Obx(
+                  () => Container(
+                    alignment: Alignment.topCenter,
+                    width: 90,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.white),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Checkbox(
+                          value: ordercontroller.isChecked.value,
+                          onChanged: (bool? value) {
+                            ordercontroller.toggleCheck(value);
+                          },
+                        ),
+                        const Text('Paid'),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(
                   height: 30.0,
                 ),
@@ -322,13 +404,17 @@ class Add extends GetView<OrederController> {
                             ordercontroller.isChecked.value == 1 ? true : false,
                         type: ordercontroller.item.value,
                         user_id: ordercontroller.userId.value,
+                        item_id: autoComplete1.products.value,
                       );
                       if (Get.arguments == null) {
                         await ordercontroller.insert('orders', orders);
+                        // await itemcontroller
+                        //     .getAnyByIdItem(autoComplete1.products.value);
                         await Notifications1()
                             .sendMessage('hi', 'you add Order', 'aa');
                         await Notifications1().initNotifications();
                         notificationController.increase();
+                        // autoComplete1.getAllItems();
                       } else {
                         await ordercontroller.updateOrders(
                             'orders', orders, Get.arguments.id);

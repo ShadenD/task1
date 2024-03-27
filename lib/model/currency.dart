@@ -1,11 +1,11 @@
 // ignore_for_file: non_constant_identifier_names
 
-class Currency {
+class Currency1 {
   final String currencyName;
   final String currencySymbol;
   final double rate;
 
-  Currency({
+  Currency1({
     required this.currencyName,
     required this.currencySymbol,
     required this.rate,

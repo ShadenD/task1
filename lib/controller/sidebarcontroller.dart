@@ -5,9 +5,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:welcom/main.dart';
 import 'package:welcom/view/CurrencyPage.dart';
 import 'package:welcom/view/OrderPage.dart';
+import 'package:welcom/view/itemList.dart';
 import 'package:welcom/view/login2.dart';
 import 'package:welcom/view/signup1.dart';
 import 'package:welcom/view/userPage.dart';
+
 class SideBarController extends GetxController {
   RxInt index = 0.obs;
   RxString text = ''.obs;
@@ -18,9 +20,12 @@ class SideBarController extends GetxController {
       text.value = 'Currencies';
     } else if (index.value == 2) {
       text.value = 'Orders';
+    } else if (index.value == 3) {
+      text.value = 'Items';
     }
     return text.value;
   }
+
   Future<void> handleSignOut() => GoogleSignIn().disconnect();
   logout() {
     return IconButton(
@@ -31,6 +36,7 @@ class SideBarController extends GetxController {
         },
         icon: const Icon(Icons.logout));
   }
+
   add() {
     if (index.value == 0) {
       return IconButton(
@@ -45,6 +51,6 @@ class SideBarController extends GetxController {
     Archives(),
     Currency(),
     Orders(),
+    itemList(),
   ].obs;
-  
 }

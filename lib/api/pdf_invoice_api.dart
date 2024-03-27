@@ -1,7 +1,6 @@
 // ignore_for_file: non_constant_identifier_names, unrelated_type_equality_checks
 
 import 'dart:io';
-
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';

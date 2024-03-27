@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, unnecessary_null_comparison
 
 import 'package:get/get.dart';
 import 'package:welcom/model/order.dart';
@@ -8,6 +8,7 @@ class OrederController extends GetxController {
   RxInt currencyId = 0.obs;
   RxDouble rate = 0.0.obs;
   RxInt userId = 0.obs;
+  RxInt itemId = 0.obs;
   RxString item = "".obs;
   RxList orders = [].obs;
   RxList? states = [].obs;
@@ -73,6 +74,33 @@ class OrederController extends GetxController {
     userId.value = value;
   }
 
+  // Future<void> updateItemId(String value1) async {
+  //   // Execute the SQL query to retrieve the itemId
+  //   var resultSet = await sqldb.readJoin('''
+  //   SELECT items.itemId AS itemId
+  //   FROM orders
+  //   JOIN items ON items.itemId = orders.item_id
+  //   WHERE itemName = '$value1'
+  // ''');
+
+  //   // Extract the integer value from the result set
+  //   int? itemId1;
+  //   if (resultSet.isNotEmpty) {
+  //     // Assuming the first column of the first row contains the itemId
+  //     itemId1 = resultSet.first['itemId'] as int?;
+  //   }
+
+  //   // Check if itemId is not null
+  //   if (itemId != null) {
+  //     // Update the itemId
+  //     itemId.value = itemId1!;
+  //     print('item id: $itemId');
+  //   } else {
+  //     // Handle the case where itemId is null
+  //     print('Invalid item id: $value1');
+  //   }
+  // }
+
   updateType(String value) {
     item.value = value;
   }
@@ -88,12 +116,33 @@ class OrederController extends GetxController {
 
   Future<dynamic> readDataOrder() async {
     List response = await sqldb.readJoin('''
-    SELECT users.username AS username, currency.currencyName AS currencyName, currency.rate AS rate,
-    orders.order_date, orders.status AS status, orders.order_amount AS amount, users.id AS user_id, currency.currencyId AS curr_id,
-    orders.type AS type,users.email As email ,users.bod AS bod, orders.equal_order_amount AS equalAmount, orders.order_id AS order_Id 
-    FROM orders JOIN users 
-    ON users.id=orders.user_id JOIN currency 
-    ON currency.currencyId=orders.curr_id
+    SELECT 
+    users.username AS username, 
+    currency.currencyName AS currencyName, 
+    currency.rate AS rate,
+     items.itemId AS itemId, 
+       items.itemName AS itemName, 
+       items.image AS image,  
+       items.price AS price, 
+       items.quantity AS quantity,
+    orders.order_date, 
+    orders.status AS status, 
+    orders.order_amount AS amount, 
+    users.id AS user_id, 
+    currency.currencyId AS curr_id,
+    orders.type AS type,
+    users.email AS email,
+    users.bod AS bod, 
+    orders.equal_order_amount AS equalAmount, 
+    orders.order_id AS order_Id 
+FROM 
+    orders 
+JOIN 
+    users ON users.id = orders.user_id
+JOIN 
+    currency ON currency.currencyId = orders.curr_id
+    JOIN items ON items.itemId = orders.item_id 
+
 ''');
     orders.addAll(response);
     addStates();
@@ -137,30 +186,57 @@ class OrederController extends GetxController {
     }
   }
 
+  getLast() async {
+    List<Map> oneOrder =
+        await sqldb.readData(''' SELECT users.username AS username, 
+       currency.currencyName AS currencyName,
+       currency.rate AS rate, 
+       items.itemId AS itemId, 
+       items.itemName AS itemName, 
+       items.image AS image,  
+       items.price AS price, 
+       items.quantity AS quantity,
+       orders.order_date, 
+       orders.status AS status, 
+       orders.order_amount AS amount, 
+       users.id AS user_id, 
+       currency.currencyId AS curr_id,
+       orders.type AS type,
+       users.email AS email,
+       users.bod AS bod, 
+       orders.equal_order_amount AS equalAmount, 
+       orders.order_id AS order_Id 
+FROM orders 
+JOIN users ON users.id = orders.user_id 
+JOIN currency ON currency.currencyId = orders.curr_id 
+JOIN items ON items.itemId = orders.item_id 
+ORDER BY orders.order_id DESC 
+LIMIT 1 ''');
+    return oneOrder;
+  }
+
   insert(String table, Orderss order) async {
     Map<String, dynamic> orderMap = order.toMap();
     int response = await sqldb.insert(table, orderMap);
-    List<Map> oneOrder = await sqldb.readData(
-        ''' SELECT users.username AS username, currency.currencyName AS currencyName, 
-    orders.order_date, orders.status AS status, orders.order_amount AS amount, users.id AS user_id, currency.currencyId AS curr_id,
-    orders.type AS type,users.email As email ,users.bod AS bod, orders.equal_order_amount AS equalAmount, orders.order_id AS order_Id 
-    FROM orders JOIN users 
-    ON users.id=orders.user_id JOIN currency 
-    ON currency.currencyId=orders.curr_id ORDER BY orders.order_id DESC LIMIT 1 ''');
-    Map indexOrderOne = oneOrder[0];
-    // print(indexOrderOne);
-    orders.add(indexOrderOne);
-    print(orders);
+    List<Map> inserted = await getLast();
+    Map insertedOrder = inserted[0];
+    orders.add(insertedOrder);
+    print('sssssssssssss: $orders');
     return response;
   }
 
   getAnyById(int id) async {
     List<Map> oneIndex = await sqldb.getReadOne('''
-    SELECT users.username AS username, currency.currencyName AS currencyName, 
+    SELECT users.username AS username, currency.currencyName AS currencyName,currency.rate AS rate,items.itemId AS itemId, 
+       items.itemName AS itemName, 
+       items.image AS image,  
+       items.price AS price, 
+       items.quantity AS quantity,  
     orders.order_date, orders.status AS status, orders.order_amount AS amount, users.id AS user_id, currency.currencyId AS curr_id,
     orders.type AS type, orders.equal_order_amount AS equalAmount, orders.order_id AS order_Id
     FROM orders JOIN users 
     ON users.id=orders.user_id JOIN currency 
+    JOIN items ON items.itemId = orders.item_id 
     ON currency.currencyId=orders.curr_id WHERE orders.order_id =$id
 ''');
     return oneIndex;

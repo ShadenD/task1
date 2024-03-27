@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:welcom/controller/currencyController.dart';
 import 'package:welcom/controller/notificationController.dart';
+import 'package:welcom/model/currency.dart';
 import 'package:welcom/view/addCurrency.dart';
 
 // ignore: must_be_immutable
@@ -106,25 +107,23 @@ class Currency extends GetView<CurrencyController> {
                                         )),
                                     IconButton(
                                         onPressed: () async {
-                                          Get.to(AddCurr(), arguments: {
-                                            "currencyId": controller.currency[i]
-                                                    ['currencyId']
-                                                .toString(),
-                                            'currencyName': controller
-                                                .currency[i]['currencyName']!
-                                                .toString(),
-                                            'currencySymbol': controller
-                                                .currency[i]['currencySymbol']!
-                                                .toString(),
-                                            'rate': controller.currency[i]
-                                                    ['rate']!
-                                                .toString()
-                                          });
+                                          Get.to(AddCurr(),
+                                              arguments: Currency1(
+                                                  currencyName: controller
+                                                      .currency[i]
+                                                          ['currencyName']!
+                                                      .toString(),
+                                                  currencySymbol: controller
+                                                      .currency[i]
+                                                          ['currencySymbol']!
+                                                      .toString(),
+                                                  rate: controller.currency[i]
+                                                      ['rate']!));
                                         },
                                         icon: const Icon(
                                           Icons.edit_outlined,
                                           color: Colors.black,
-                                        )),
+                                        ))
                                   ]),
                             ),
                           ),

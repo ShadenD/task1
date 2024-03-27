@@ -26,9 +26,11 @@ class SignupPage extends GetView<SignupPageController> {
   @override
   Widget build(BuildContext context) {
     if (Get.arguments != null) {
-      controller3.textEditingController.text = Get.arguments!['email'];
-      controller3.userEditingController.text = Get.arguments!['username'];
-      controller3.passEditingController.text = Get.arguments!['pass'];
+      Users users = Get.arguments;
+      controller3.textEditingController.text = users.email;
+      controller3.userEditingController.text = users.username;
+      controller3.passEditingController.text = users.pass;
+      controller3.selectedImagePath.value = users.photo;
     }
     return Scaffold(
       resizeToAvoidBottomInset: true,

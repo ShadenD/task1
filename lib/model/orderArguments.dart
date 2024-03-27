@@ -4,7 +4,7 @@ import 'package:welcom/model/order.dart';
 
 class OrderArgument {
   final int id;
-  final Currency currency;
+  final Currency1 currency;
   final Orderss order;
 
   OrderArgument(

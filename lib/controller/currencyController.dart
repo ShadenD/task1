@@ -9,7 +9,7 @@ class CurrencyController extends GetxController {
   SqlDB sqldb = SqlDB();
   RxList currency = [].obs;
 
-  insert(String table, Currency currency1) async {
+  insert(String table, Currency1 currency1) async {
     Map<String, dynamic> currencyMap = await currency1.toMap();
     print(currencyMap);
     int response = await sqldb.insert(table, currencyMap);
@@ -28,7 +28,7 @@ class CurrencyController extends GetxController {
 
   
 
-  updateCurrency(String table, Currency currency, int id) async {
+  updateCurrency(String table, Currency1 currency, int id) async {
     Map<String, dynamic> orderMap = currency.toMap();
     int response = await sqldb.update(table, orderMap, "currencyId=$id");
     if (response > 0) {

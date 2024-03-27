@@ -17,9 +17,11 @@ class AddCurr extends GetView<CurrencyController> {
   @override
   Widget build(BuildContext context) {
     if (Get.arguments != null) {
-      controllerCurrName.text = Get.arguments['currencyName'];
-      controllerCurrSymbol.text = Get.arguments['currencySymbol'];
-      controllerRate.text = Get.arguments['rate'];
+      Currency1 currency1 = Get.arguments;
+      //  controllerCurrName.text currency1.currencyName;
+      controllerCurrName.text = currency1.currencyName;
+      controllerCurrSymbol.text = currency1.currencySymbol;
+      controllerRate.text = "${currency1.rate}";
     }
     return Scaffold(
       appBar: AppBar(
@@ -93,7 +95,7 @@ class AddCurr extends GetView<CurrencyController> {
               minWidth: double.infinity,
               height: 60,
               onPressed: () async {
-                Currency currency1 = Currency(
+                Currency1 currency1 = Currency1(
                     currencyName: controllerCurrName.text,
                     currencySymbol: controllerCurrSymbol.text,
                     rate: double.parse(controllerRate.text));
@@ -107,6 +109,7 @@ class AddCurr extends GetView<CurrencyController> {
                 } else {
                   final int? currencyId =
                       int.parse(Get.arguments!['currencyId']);
+                  print('update');
                   await controller.updateCurrency(
                       'currency', currency1, currencyId!);
                   await Notifications1()

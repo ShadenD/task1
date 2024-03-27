@@ -8,6 +8,7 @@ class Orderss {
   bool status;
   String type;
   int user_id;
+  int item_id;
 
   Orderss({
     required this.order_date,
@@ -17,6 +18,7 @@ class Orderss {
     required this.status,
     required this.type,
     required this.user_id,
+    required this.item_id,
   });
   Map<String, dynamic> toMap() => {
         'order_date': order_date,
@@ -26,5 +28,6 @@ class Orderss {
         'status': status,
         'type': type,
         'user_id': user_id,
+        'item_id': item_id,
       };
 }
